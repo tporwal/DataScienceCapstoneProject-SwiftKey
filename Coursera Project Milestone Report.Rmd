@@ -1,0 +1,140 @@
+---
+title: "Capstone Project - Milestone Report"
+author: "Tanishq Porwal"
+date: "15/08/2020"
+output: html_document
+---
+
+## This is a Milestone Report for the Coursera Data Science Project: Swift Key
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+#Loading the necessary libraries:
+library(plyr)
+library(dplyr)
+library(tm)
+library(RWeka)
+library(ggplot2)
+```
+
+Dataset is already downloaded, so now we will start reading the data:
+
+```{r echo=TRUE}
+path <- file.path("E:\\RStudio\\projects\\DataScienceCapstoneProject-SwiftKey\\final\\en_US")
+files<-list.files(path, recursive=TRUE)
+
+con <- file("E:\\RStudio\\projects\\DataScienceCapstoneProject-SwiftKey\\final\\en_US\\en_US.twitter.txt") 
+twitterLine<-readLines(con,  skipNul = TRUE)
+close(con)
+
+
+con <- file("E:\\RStudio\\projects\\DataScienceCapstoneProject-SwiftKey\\final\\en_US\\en_US.blogs.txt") 
+blogsLine<-readLines(con, skipNul = TRUE)
+close(con)
+
+
+con <- file("E:\\RStudio\\projects\\DataScienceCapstoneProject-SwiftKey\\final\\en_US\\en_US.news.txt") 
+newsLine<-readLines(con, skipNul = TRUE)
+close(con)
+```
+
+Summaries of each Text File we have read:
+
+```{r,echo=TRUE}
+summary(nchar(twitterLine))
+summary(nchar(blogsLine))
+summary(nchar(newsLine))
+```
+
+Length of each file:
+```{r,echo=TRUE}
+length(twitterLine)
+length(blogsLine)
+length(newsLine)
+```
+Seeing the first 3 rows of each file:
+```{r,echo=TRUE}
+head(twitterLine,3)
+
+head(blogsLine,3)
+
+head(newsLine,3)
+```
+
+## Cleaning the Data
+
+```{r, echo=TRUE}
+
+set.seed(12345)
+samp <- 0.01
+blogs <- sample(seq_len(length(blogsLine)),length(blogsLine)*samp)
+news <- sample(seq_len(length(newsLine)),length(newsLine)*samp)
+twitter <- sample(seq_len(length(twitterLine)),length(twitterLine)*samp)
+
+subBlogs <- blogsLine[blogs[]]
+subNews<- newsLine[news[]]
+subTwitter<- twitterLine[twitter[]]
+```
+
+Creating Corpus:
+```{r, echo=TRUE}
+corpus <- VCorpus(VectorSource(c(subBlogs,subNews,subTwitter)))
+toSpace <- content_transformer(function(x, pattern) gsub(pattern, " ", x))
+corpus <- tm_map(corpus, toSpace, "(f|ht)tp(s?)://(.*)[.][a-z]+")
+corpus <- tm_map(corpus, toSpace, "@[^\\s]+")
+corpus <- tm_map(corpus, tolower)
+corpus <- tm_map(corpus, removeWords, stopwords("en"))
+corpus <- tm_map(corpus, removePunctuation)
+corpus <- tm_map(corpus, removeNumbers)
+corpus <- tm_map(corpus, stripWhitespace)
+corpus <- tm_map(corpus, PlainTextDocument)
+head(corpus)
+```
+
+## Exploratory Data Analysis
+
+We will see the most 50 frequent words.
+
+
+For One Word:
+```{r, echo=TRUE}
+f50 <- removeSparseTerms(TermDocumentMatrix(corpus), 0.9999)
+f50 <- sort(rowSums(as.matrix(f50)), decreasing = TRUE)
+ff50 <- data.frame(word = names(f50), frequency = f50)
+```
+```{r,echo=TRUE}
+
+g2<- ggplot(ff50[1:50,], aes(word, frequency)) + ggtitle(" 50 Most Frequently Used Words")+ xlab("Words") + ylab("Frequency")+ theme(axis.text.x = element_text(angle = 90)) + geom_bar(stat = "identity", fill="green")+ 
+                 theme(plot.title = element_text(hjust = 0.5))
+g2
+```
+
+For Two Words:
+```{r, echo=TRUE}
+BigramTokenizer <- function(x) {NGramTokenizer(x, Weka_control(min = 2, max = 2))}
+bf50 <- removeSparseTerms(TermDocumentMatrix(corpus, control = list(tokenize = BigramTokenizer)), 0.9999)
+bigramf50 <- sort(rowSums(as.matrix(bf50)), decreasing = TRUE)
+bigramf50 <- data.frame(word = names(bigramf50), frequency = bigramf50)
+g3<- ggplot(bigramf50[1:50,], aes(word, frequency)) + ggtitle(" 50 Most Frequently Used Words")+ xlab("Words") + ylab("Frequency")+ theme(axis.text.x = element_text(angle = 90)) + geom_bar(stat = "identity", fill="green")+ 
+                 theme(plot.title = element_text(hjust = 0.5))
+g3
+```
+
+For Three Words:
+```{r, echo=TRUE}
+TrigramTokenizer <- function(x) {NGramTokenizer(x, Weka_control(min = 3, max = 3))}
+ tf50<- removeSparseTerms(TermDocumentMatrix(corpus, control = list(tokenize = TrigramTokenizer)), 0.9999)
+trif50 <- sort(rowSums(as.matrix(tf50)), decreasing = TRUE)
+trif50 <- data.frame(word = names(trif50), frequency = trif50)
+g4<- ggplot(trif50[1:50,], aes(word, frequency)) + ggtitle(" 50 Most Frequently Used Words")+ xlab("Words") + ylab("Frequency")+ theme(axis.text.x = element_text(angle = 90)) + geom_bar(stat = "identity", fill="green")+ 
+                 theme(plot.title = element_text(hjust = 0.5))
+g4
+```
+
+
+```{r, echo=TRUE}
+
+saveRDS(ff50, file="unigram.RData")
+saveRDS(bigramf50, file="bigram.RData")
+saveRDS(trif50, file="trigram.RData")
+```
+

@@ -1,0 +1,34 @@
+---
+title: "CapStone Project"
+author: "Tanishq Porwal"
+date: "14/08/2020"
+output: html_document
+---
+
+```{r, echo=TRUE}
+#Loading the necessary libraries:
+conn <- file("E:\\RStudio\\projects\\DataScienceCapstoneProject-SwiftKey\\final\\en_US\\en_US.blogs.txt")
+blog <- readLines(conn)
+summary(nchar(blog))
+readLines(con, 5) 
+length(readLines(conn) )
+close(conn)
+
+love<-length(grep("love", twitter_lines))
+hate<-length(grep("hate", twitter_lines))
+love/hate
+grep("A computer once beat me at chess, but it was no match for me at kickboxing", twitter_lines)
+```
+
+```{r, echo=TRUE}
+
+c <-TermDocumentMatrix(corpus,control=list(minWordLength=1))
+wf <-rowapply_simple_triplet_matrix(c,sum)
+wf <-wf[order(wf, decreasing=T)]
+f50 <-as.data.frame(wf[1:40])
+f50 <-data.frame(words = row.names(f50),f50)
+names(f50)[2] = "frequency"
+row.names(f50) <-NULL
+g <- ggplot(data=f50, aes(x=words, y=frequency, fill=frequency)) + geom_bar(stat="identity") + theme(axis.text.x=element_text(angle=90)) + ggtitle(" Most Frequently Used 50 Words") + theme(plot.title = element_text(hjust = 0.5))
+g
+```

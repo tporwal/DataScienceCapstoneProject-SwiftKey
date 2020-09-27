@@ -1,0 +1,43 @@
+---
+title: "SwiftKey Data Science Coursera Capstone Project"
+author: "Tanishq Porwal"
+date: "18/09/2020"
+output: ioslides_presentation
+---
+
+***
+### Project Overview:
+
+Johns Hopkins University along with Swiftkey, sponsored a project for students to analyze three different corpuses together, explore the content of the data with various data analysis tools, and create an app that predicts the next word of various sentences, phrases, and single words.
+
+Basically, we need to develop an application that would predict the next word in a phrase that the user inputs.
+
+
+- Dataset Link: 
+https://d396qusza40orc.cloudfront.net/dsscapstone/dataset/Coursera-SwiftKey.zip
+
+We need to first Clean the dataset then perform Exploratory Data Analysis and then build a model which predicts next word according to the user input.
+
+
+## Algorithm Used:
+
+The algorithm used was The Katz Backoff Model. This model will predict the probability of a word being the next one chosen by a user inputting text by comparing what has already been entered against a set of ngrams - quadgram, trigram, and bigram.
+
+
+***
+- GitHub Repo Link: https://github.com/tporwal/DataScienceCapstoneProject-SwiftKey
+- Shiny WebApp: https://tanishqporwal.shinyapps.io/NextWordPredictor/
+```{r ,out.width=700, out.height=-800,echo=FALSE}
+library(png)
+library(grid)
+img <- readPNG("E://RStudio//projects//DataScienceCapstoneProject-SwiftKey//shinyapp.png")
+grid.raster(img)
+```
+
+
+
+## Instructions to use Shiny WebApp: Next Word Predictor
+
+- Enter a phrase in English, into the textbox labelled "Enter Text Here".
+- Predicted Next Word will appear below the textbox labelled "Suggested Next Word".
+- You can see Your given input  below the textbox labelled "Your Input".
